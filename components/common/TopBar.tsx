@@ -2,17 +2,23 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useFetchCurrentUser } from '../../services/auth';
 import Icon from './Icon';
+import UserManagement from '../users/UserManagement';
 
 type TopbarProps = {
    showSettings: Function,
    showAddModal: Function,
 }
 
-const TopBar = ({ showSettings, showAddModal }:TopbarProps) => {
+const TopBar = ({ showSettings, showAddModal }: TopbarProps) => {
    const [showMobileMenu, setShowMobileMenu] = useState<boolean>(false);
+   const [showUsersPanel, setShowUsersPanel] = useState<boolean>(false);
    const router = useRouter();
    const isDomainsPage = router.pathname === '/domains';
+
+   const { data: currentUserData } = useFetchCurrentUser();
+   const isAdmin = currentUserData?.user?.role === 'admin';
 
    const logoutUser = async () => {
       try {
@@ -30,61 +36,79 @@ const TopBar = ({ showSettings, showAddModal }:TopbarProps) => {
    };
 
    return (
-       <div className={`topbar flex w-full mx-auto justify-between 
-       ${isDomainsPage ? 'max-w-5xl lg:justify-between' : 'max-w-7xl lg:justify-end'}  bg-white lg:bg-transparent`}>
+      <>
+         <div className={`topbar flex w-full mx-auto justify-between
+         ${isDomainsPage ? 'max-w-5xl lg:justify-between' : 'max-w-7xl lg:justify-end'}  bg-white lg:bg-transparent`}>
 
-         <h3 className={`p-4 text-base font-bold text-emerald-700 ${isDomainsPage ? 'lg:pl-0' : 'lg:hidden'}`}>
-            <span className=' relative top-[3px] mr-1'><Icon type="logo" size={24} color="#059669" /></span> MintSERP
-            <button className='px-3 py-1 font-bold text-blue-700  lg:hidden ml-3 text-lg' onClick={() => showAddModal()}>+</button>
-         </h3>
-         {!isDomainsPage && router.asPath !== '/research' && (
-            <Link href={'/domains'} passHref={true}>
-               <a className=' right-14 top-2 px-2 py-1 cursor-pointer bg-[#ecf2ff] hover:bg-indigo-100 transition-all
-               absolute lg:top-3 lg:right-auto lg:left-8 lg:px-3 lg:py-2 rounded-full'>
-                  <Icon type="caret-left" size={16} title="Go Back" />
-               </a>
-            </Link>
-         )}
-         <div className="topbar__right">
-            <button className={' lg:hidden p-3'} onClick={() => setShowMobileMenu(!showMobileMenu)}>
-               <Icon type="hamburger" size={24} />
-            </button>
-            <ul
-            className={`text-sm font-semibold text-gray-500 absolute mt-[-10px] right-3 bg-white 
-            border border-gray-200 lg:mt-2 lg:relative lg:block lg:border-0 lg:bg-transparent ${showMobileMenu ? 'block' : 'hidden'}`}>
-               <li className={`block lg:inline-block lg:ml-5 ${router.asPath === '/domains' ? ' text-blue-700' : ''}`}>
-                  <Link href={'/domains'} passHref={true}>
-                     <a className='block px-3 py-2 cursor-pointer'>
-                        <Icon type="domains" color={router.asPath === '/domains' ? '#1d4ed8' : '#888'} size={14} /> Domains
+            <h3 className={`p-4 text-base font-bold text-emerald-700 ${isDomainsPage ? 'lg:pl-0' : 'lg:hidden'}`}>
+               <span className=' relative top-[3px] mr-1'><Icon type="logo" size={24} color="#059669" /></span> MintSERP
+               <button className='px-3 py-1 font-bold text-blue-700  lg:hidden ml-3 text-lg' onClick={() => showAddModal()}>+</button>
+            </h3>
+            {!isDomainsPage && router.asPath !== '/research' && (
+               <Link href={'/domains'} passHref={true}>
+                  <a className=' right-14 top-2 px-2 py-1 cursor-pointer bg-[#ecf2ff] hover:bg-indigo-100 transition-all
+                  absolute lg:top-3 lg:right-auto lg:left-8 lg:px-3 lg:py-2 rounded-full'>
+                     <Icon type="caret-left" size={16} title="Go Back" />
+                  </a>
+               </Link>
+            )}
+            <div className="topbar__right">
+               <button className={' lg:hidden p-3'} onClick={() => setShowMobileMenu(!showMobileMenu)}>
+                  <Icon type="hamburger" size={24} />
+               </button>
+               <ul
+               className={`text-sm font-semibold text-gray-500 absolute mt-[-10px] right-3 bg-white
+               border border-gray-200 lg:mt-2 lg:relative lg:block lg:border-0 lg:bg-transparent ${showMobileMenu ? 'block' : 'hidden'}`}>
+                  <li className={`block lg:inline-block lg:ml-5 ${router.asPath === '/domains' ? ' text-blue-700' : ''}`}>
+                     <Link href={'/domains'} passHref={true}>
+                        <a className='block px-3 py-2 cursor-pointer'>
+                           <Icon type="domains" color={router.asPath === '/domains' ? '#1d4ed8' : '#888'} size={14} /> Domains
+                        </a>
+                     </Link>
+                  </li>
+                  <li className={`block lg:inline-block lg:ml-5 ${router.asPath === '/research' ? ' text-blue-700' : ''}`}>
+                     <Link href={'/research'} passHref={true}>
+                        <a className='block px-3 py-2 cursor-pointer'>
+                           <Icon type="research" color={router.asPath === '/research' ? '#1d4ed8' : '#888'} size={14} /> Research
+                        </a>
+                     </Link>
+                  </li>
+                  {isAdmin && (
+                     <li className='block lg:inline-block lg:ml-5'>
+                        <a className='block px-3 py-2 cursor-pointer' onClick={() => setShowUsersPanel(true)}>
+                           <Icon type="user" color={'#888'} size={14} /> Users
+                        </a>
+                     </li>
+                  )}
+                  <li className='block lg:inline-block lg:ml-5'>
+                     <a className='block px-3 py-2 cursor-pointer' onClick={() => showSettings()}>
+                        <Icon type="settings-alt" color={'#888'} size={14} /> Settings
                      </a>
-                  </Link>
-               </li>
-               <li className={`block lg:inline-block lg:ml-5 ${router.asPath === '/research' ? ' text-blue-700' : ''}`}>
-                  <Link href={'/research'} passHref={true}>
-                     <a className='block px-3 py-2 cursor-pointer'>
-                        <Icon type="research" color={router.asPath === '/research' ? '#1d4ed8' : '#888'} size={14} /> Research
+                  </li>
+                  <li className='block lg:inline-block lg:ml-5'>
+                     <a className='block px-3 py-2 cursor-pointer' href='https://docs.serpbear.com/' target="_blank" rel='noreferrer'>
+                        <Icon type="question" color={'#888'} size={14} /> Help
                      </a>
-                  </Link>
-               </li>
-               <li className='block lg:inline-block lg:ml-5'>
-                  <a className='block px-3 py-2 cursor-pointer' onClick={() => showSettings()}>
-                     <Icon type="settings-alt" color={'#888'} size={14} /> Settings
-                  </a>
-               </li>
-               <li className='block lg:inline-block lg:ml-5'>
-                  <a className='block px-3 py-2 cursor-pointer' href='https://docs.serpbear.com/' target="_blank" rel='noreferrer'>
-                     <Icon type="question" color={'#888'} size={14} /> Help
-                  </a>
-               </li>
-               <li className='block lg:inline-block lg:ml-5'>
-                  <a className='block px-3 py-2 cursor-pointer' onClick={() => logoutUser()}>
-                     <Icon type="logout" color={'#888'} size={14} /> Logout
-                  </a>
-               </li>
-            </ul>
+                  </li>
+                  <li className='block lg:inline-block lg:ml-5'>
+                     <a className='block px-3 py-2 cursor-pointer' onClick={() => logoutUser()}>
+                        <Icon type="logout" color={'#888'} size={14} /> Logout
+                     </a>
+                  </li>
+                  {currentUserData?.user && (
+                     <li className='block lg:inline-block lg:ml-3 text-xs text-gray-400'>
+                        <span className='block px-3 py-2'>
+                           {currentUserData.user.username}
+                           <span className='ml-1 capitalize'>({currentUserData.user.role})</span>
+                        </span>
+                     </li>
+                  )}
+               </ul>
+            </div>
          </div>
-       </div>
+         {showUsersPanel && <UserManagement closePanel={() => setShowUsersPanel(false)} />}
+      </>
    );
- };
+};
 
- export default TopBar;
+export default TopBar;
