@@ -49,7 +49,10 @@ if [ ! -f /app/data/failed_queue.json ]; then
     echo "[]" > /app/data/failed_queue.json
 fi
 
-# Run database migrations
-npx sequelize-cli db:migrate --env production
+# Initialize empty SQLite database if it doesn't exist
+if [ ! -f /app/data/database.sqlite ]; then
+    echo "Creating empty SQLite database..."
+    touch /app/data/database.sqlite
+fi
 
 exec "$@"
