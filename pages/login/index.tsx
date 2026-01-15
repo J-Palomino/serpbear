@@ -63,14 +63,14 @@ const Login: NextPage = () => {
    return (
       <div className={'Login'}>
          <Head>
-            <title>Login - SerpBear</title>
+            <title>Login - MintSERP</title>
          </Head>
          <div className='flex items-center justify-center w-full h-screen'>
             <div className='w-80 mt-[-300px]'>
-               <h3 className="py-7 text-2xl font-bold text-blue-700 text-center">
+               <h3 className="py-7 text-2xl font-bold text-emerald-700 text-center">
                   <span className=' relative top-[3px] mr-1'>
-                     <Icon type="logo" size={30} color="#364AFF" />
-                  </span> SerpBear
+                     <Icon type="logo" size={30} color="#059669" />
+                  </span> MintSERP
                </h3>
                <div className='relative bg-[white] rounded-md text-sm border p-5'>
                   <div className="settings__section__input mb-5">
@@ -99,7 +99,7 @@ const Login: NextPage = () => {
                   </div>
                   <button
                   onClick={() => loginuser()}
-                  className={'py-3 px-5 w-full rounded cursor-pointer bg-blue-700 text-white font-semibold text-sm'}>
+                  className={'py-3 px-5 w-full rounded cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm'}>
                      Login
                   </button>
                   {error && error.msg

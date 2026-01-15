@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'fs/promises';
 import HttpsProxyAgent from 'https-proxy-agent';
 import countries from './countries';
 import allScrapers from '../scrapers/index';
+import { getNextApiKey, getKeyRotationState } from './keyRotation';
 
 type SearchResult = {
    title: string,
@@ -88,6 +89,25 @@ export const getScraperClient = (keyword:KeywordType, settings:SettingsType, scr
 };
 
 /**
+ * Get the API key to use - either from rotation pool or fallback to settings
+ * @param {string} provider - The scraper provider ID
+ * @param {SettingsType} settings - The app settings
+ * @returns {Promise<string|null>}
+ */
+const getApiKeyForScraper = async (provider: string, settings: SettingsType): Promise<string | null> => {
+   // First try to get a key from the rotation pool
+   const rotationState = await getKeyRotationState();
+   if (rotationState.keys.length > 0) {
+      const rotatedKey = await getNextApiKey(provider);
+      if (rotatedKey) {
+         return rotatedKey;
+      }
+   }
+   // Fallback to the single key in settings
+   return settings.scaping_api || null;
+};
+
+/**
  * Scrape Google Search result as object array from the Google Search's HTML content
  * @param {string} keyword - the keyword to search for in Google.
  * @param {string} settings - the App Settings
@@ -104,7 +124,12 @@ export const scrapeKeywordFromGoogle = async (keyword:KeywordType, settings:Sett
    };
    const scraperType = settings?.scraper_type || '';
    const scraperObj = allScrapers.find((scraper:ScraperSettings) => scraper.id === scraperType);
-   const scraperClient = getScraperClient(keyword, settings, scraperObj);
+
+   // Get API key from rotation pool or settings
+   const apiKey = await getApiKeyForScraper(scraperType, settings);
+   const settingsWithRotatedKey = { ...settings, scaping_api: apiKey || settings.scaping_api };
+
+   const scraperClient = getScraperClient(keyword, settingsWithRotatedKey, scraperObj);
 
    if (!scraperClient) { return false; }
 
