@@ -73,8 +73,8 @@ const deleteKey = async (req: NextApiRequest, res: NextApiResponse<KeysResponse>
   try {
     // Get the full key from state before deleting (since the passed key might be masked)
     const state = await getKeyRotationState();
-    const fullKey = state.keys.find(k =>
-      k.key.startsWith(key.substring(0, 8)) && k.key.endsWith(key.substring(key.length - 4))
+    const fullKey = state.keys.find((k) =>
+      k.key.startsWith(key.substring(0, 8)) && k.key.endsWith(key.substring(key.length - 4)),
     );
 
     if (fullKey) {

@@ -251,3 +251,50 @@ interface ScraperSettings {
    /** Custom function to extract the serp result from the scraped data. The extracted data should be @return {scraperExtractedItem[]} */
    serpExtractor?(content:string): scraperExtractedItem[],
 }
+
+// User Management Types
+type UserRole = 'admin' | 'editor' | 'viewer';
+
+type UserType = {
+   ID: number;
+   email: string;
+   username: string;
+   role: UserRole;
+   isActive: boolean;
+   lastLogin: string | null;
+   createdAt: string;
+   updatedAt?: string;
+}
+
+type InviteType = {
+   ID: number;
+   token: string;
+   email: string | null;
+   role: UserRole;
+   createdBy: number;
+   expiresAt: string;
+   used: boolean;
+   usedBy: number | null;
+   usedAt: string | null;
+   createdAt: string;
+   inviteUrl?: string;
+   isExpired?: boolean;
+   isValid?: boolean;
+   creator?: { username: string };
+}
+
+type AuthenticatedUser = {
+   userId: number;
+   username: string;
+   email: string;
+   role: UserRole;
+}
+
+type AuthContextType = {
+   user: UserType | null;
+   isLoading: boolean;
+   isAuthenticated: boolean;
+   login: (username: string, password: string) => Promise<boolean>;
+   logout: () => Promise<void>;
+   hasPermission: (permission: string) => boolean;
+}
