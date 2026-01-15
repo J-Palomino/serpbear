@@ -27,23 +27,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 const getMigrationStatus = async (req: NextApiRequest, res: NextApiResponse<MigrationGetResponse>) => {
    const sequelize = new Sequelize({ dialect: 'sqlite', storage: './data/database.sqlite', logging: false });
+   await sequelize.authenticate();
+   const queryInterface = sequelize.getQueryInterface();
+   // Add sequelize reference to queryInterface for migrations that need it
+   (queryInterface as any).sequelize = sequelize;
    const umzug = new Umzug({
       migrations: { glob: 'database/migrations/*.js' },
-      context: sequelize.getQueryInterface(),
+      context: queryInterface,
       storage: new SequelizeStorage({ sequelize }),
       logger: undefined,
    });
    const migrations = await umzug.pending();
-   // console.log('migrations :', migrations);
-   // const migrationsExceuted = await umzug.executed();
    return res.status(200).json({ hasMigrations: migrations.length > 0 });
 };
 
 const migrateDatabase = async (req: NextApiRequest, res: NextApiResponse<MigrationPostResponse>) => {
    const sequelize = new Sequelize({ dialect: 'sqlite', storage: './data/database.sqlite', logging: false });
+   await sequelize.authenticate();
+   // First sync the database to ensure tables exist
+   await db.sync();
+   const queryInterface = sequelize.getQueryInterface();
+   // Add sequelize reference to queryInterface for migrations that need it
+   (queryInterface as any).sequelize = sequelize;
    const umzug = new Umzug({
       migrations: { glob: 'database/migrations/*.js' },
-      context: sequelize.getQueryInterface(),
+      context: queryInterface,
       storage: new SequelizeStorage({ sequelize }),
       logger: undefined,
    });
