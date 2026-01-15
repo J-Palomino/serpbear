@@ -1,29 +1,26 @@
 // Migration: Adds search_console field to domain table to assign search console property type, url and api.
+const { DataTypes } = require('sequelize');
 
-// CLI Migration
+// Umzug Migration (receives queryInterface as context)
 module.exports = {
-   up: (queryInterface, Sequelize) => {
-     return queryInterface.sequelize.transaction(async (t) => {
+   up: async ({ context: queryInterface }) => {
       try {
          const domainTableDefinition = await queryInterface.describeTable('domain');
          if (domainTableDefinition && !domainTableDefinition.search_console) {
-            await queryInterface.addColumn('domain', 'search_console', { type: Sequelize.DataTypes.STRING }, { transaction: t });
+            await queryInterface.addColumn('domain', 'search_console', { type: DataTypes.STRING });
          }
       } catch (error) {
-         console.log('error :', error);
+         console.log('migration error:', error);
       }
-     });
    },
-   down: (queryInterface) => {
-      return queryInterface.sequelize.transaction(async (t) => {
-         try {
-            const domainTableDefinition = await queryInterface.describeTable('domain');
-            if (domainTableDefinition && domainTableDefinition.search_console) {
-               await queryInterface.removeColumn('domain', 'search_console', { transaction: t });
-            }
-         } catch (error) {
-            console.log('error :', error);
+   down: async ({ context: queryInterface }) => {
+      try {
+         const domainTableDefinition = await queryInterface.describeTable('domain');
+         if (domainTableDefinition && domainTableDefinition.search_console) {
+            await queryInterface.removeColumn('domain', 'search_console');
          }
-      });
+      } catch (error) {
+         console.log('migration error:', error);
+      }
    },
- };
+};

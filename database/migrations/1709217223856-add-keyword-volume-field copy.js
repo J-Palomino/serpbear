@@ -1,35 +1,32 @@
 // Migration: Adds volume field to the keyword table.
+const { DataTypes } = require('sequelize');
 
-// CLI Migration
+// Umzug Migration (receives queryInterface as context)
 module.exports = {
-   up: async (queryInterface, Sequelize) => {
-      return queryInterface.sequelize.transaction(async (t) => {
-         try {
-            const keywordTableDefinition = await queryInterface.describeTable('keyword');
-            if (keywordTableDefinition) {
-               if (!keywordTableDefinition.volume) {
-                  await queryInterface.addColumn('keyword', 'volume', {
-                      type: Sequelize.DataTypes.STRING, allowNull: false, defaultValue: 0,
-                  }, { transaction: t });
-               }
+   up: async ({ context: queryInterface }) => {
+      try {
+         const keywordTableDefinition = await queryInterface.describeTable('keyword');
+         if (keywordTableDefinition) {
+            if (!keywordTableDefinition.volume) {
+               await queryInterface.addColumn('keyword', 'volume', {
+                  type: DataTypes.STRING, allowNull: false, defaultValue: '0',
+               });
             }
-         } catch (error) {
-            console.log('error :', error);
          }
-      });
+      } catch (error) {
+         console.log('migration error:', error);
+      }
    },
-   down: (queryInterface) => {
-      return queryInterface.sequelize.transaction(async (t) => {
-         try {
-            const keywordTableDefinition = await queryInterface.describeTable('keyword');
-            if (keywordTableDefinition) {
-               if (keywordTableDefinition.volume) {
-                  await queryInterface.removeColumn('keyword', 'volume', { transaction: t });
-               }
+   down: async ({ context: queryInterface }) => {
+      try {
+         const keywordTableDefinition = await queryInterface.describeTable('keyword');
+         if (keywordTableDefinition) {
+            if (keywordTableDefinition.volume) {
+               await queryInterface.removeColumn('keyword', 'volume');
             }
-         } catch (error) {
-            console.log('error :', error);
          }
-      });
+      } catch (error) {
+         console.log('migration error:', error);
+      }
    },
 };
