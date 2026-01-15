@@ -43,7 +43,8 @@ RUN npm init -y
 RUN npm i cryptr@6.0.3 dotenv@16.0.3 croner@9.0.0 @googleapis/searchconsole@1.0.5 sequelize-cli@6.6.2 @isaacs/ttlcache@1.4.1
 RUN npm i -g concurrently
 
-USER nextjs
+# Don't switch user - Railway volumes need root access
+# USER nextjs
 
 EXPOSE 3000
 
